@@ -1,29 +1,69 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../Database/Firebase";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth"; 
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import toastify styles
 
 const AdminLogin = ({ logInHandler }) => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
+    setLoading(true);
+
+    const auth = getAuth();
 
     try {
+      // Attempt to sign in
       await signInWithEmailAndPassword(auth, email, password);
-      logInHandler(); // Update login state in App.js
-      navigate("/Admindashboard"); // Redirect on successful login
+
+      // Show success toast if login is successful
+      toast.success("Successfully Logged In!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "dark",
+        style: { backgroundColor: "#111", color: "#fff" },
+      });
+
+      // Navigate after 2 seconds
+      setTimeout(() => {
+        navigate("/Admindashboard");
+      }, 2000);
+
+      // Call logInHandler after successful login
+      logInHandler();
+
     } catch (err) {
-      setError("Invalid email or password. Please try again.");
+      console.error("Error code:", err.code);  // Log the error code
+      console.error("Error message:", err.message);  // Log the error message
+
+      // Show error toast
+      toast.error("Invalid email or password. Please try again.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "dark",
+        style: { backgroundColor: "#111", color: "#fff" },
+      });
+    } finally {
+      setLoading(false); // Disable loading state after the process is complete
     }
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100 relative">
+      <ToastContainer /> {/* Toast container for notifications */}
+
       {/* Left Side with Logo */}
       <div className="w-1/2 flex justify-center items-center bg-white">
         <img src="src/assets/Logo.png" alt="YSS Logo" className="h-50 w-auto" />
@@ -39,8 +79,6 @@ const AdminLogin = ({ logInHandler }) => {
         <div className="w-3/4 max-w-md">
           <h1 className="text-4xl font-bold mb-4 font-cousine">Welcome back!</h1>
           <p className="text-gray-600 mb-8 font-cousine">Please login to your admin account</p>
-
-          {error && <p className="text-red-500">{error}</p>}
 
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
@@ -80,12 +118,23 @@ const AdminLogin = ({ logInHandler }) => {
             <button
               type="submit"
               className="w-full p-3 bg-black text-white font-medium rounded-lg transition duration-300 hover:bg-white hover:text-black border border-black"
+              disabled={loading} // Disable button while logging in
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
           </form>
         </div>
       </div>
+
+      {/* Loading Modal */}
+      {loading && (
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+            <div className="loader border-t-4 border-black border-solid rounded-full w-12 h-12 animate-spin"></div>
+            <p className="mt-4 text-gray-700">Logging in...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

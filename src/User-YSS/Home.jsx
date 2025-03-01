@@ -31,6 +31,7 @@ const images = [
 const quotes = [
   [quote1, quote2, quote3],
   [quote4, quote5, quote6],
+  
 ];
 
 function Home() {
@@ -132,7 +133,7 @@ function Home() {
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <h3 className="text-white text-2xl font-bold mb-2">PREMIUM TEES</h3>
                   <a
-                    href="/shop"
+                    href="/shop?category=premium%20tees"
                     className="text-white underline text-sm tracking-wide"
                   >
                     Shop Now
@@ -149,7 +150,7 @@ function Home() {
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <h3 className="text-white text-2xl font-bold mb-2">BASIC TEES</h3>
                   <a
-                    href="#"
+                    href="/shop?category=basic%20tees"
                     className="text-white underline text-sm tracking-wide"
                   >
                     Shop Now
@@ -168,7 +169,7 @@ function Home() {
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <h3 className="text-white text-2xl font-bold mb-2">NEW</h3>
                   <a
-                    href="/shop"
+                    href="/shop?category=new"
                     className="text-white underline text-sm tracking-wide"
                   >
                     Shop Now
