@@ -59,7 +59,7 @@ function AdminNavbar({ logOutHandler }) {
             }
           >
             <ShoppingCart className="w-6 h-6" aria-hidden="true" />
-            <span className="text-sm">SHOP</span>
+            <span className="text-sm">SHOP MANAGEMENT</span>
           </NavLink>
 
           <NavLink
@@ -72,7 +72,7 @@ function AdminNavbar({ logOutHandler }) {
             }
           >
             <Image className="w-6 h-6" aria-hidden="true" />
-            <span className="text-sm">LOOKBOOK</span>
+            <span className="text-sm">LOOKBOOK MANAGEMENT</span>
           </NavLink>
 
           <NavLink

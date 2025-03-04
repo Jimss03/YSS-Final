@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { auth, saveUserToDatabase } from "../Database/Firebase";
+import { auth, db } from "../Database/Firebase"; // Import Firebase auth and Firestore
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { collection, doc, setDoc } from "firebase/firestore"; // Firestore functions
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -36,9 +37,19 @@ function UserSignUp() {
     }
 
     try {
+      // Step 1: Create user with Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      await saveUserToDatabase(user.uid, firstName, lastName, email);
+      const user = userCredential.user; // Get the authenticated user
+
+      // Step 2: Save user data to Firestore
+      const userRef = doc(collection(db, "users"), user.uid); // Reference to Firestore 'users' collection
+      await setDoc(userRef, {
+        uid: user.uid,
+        firstName,
+        lastName,
+        email,
+        createdAt: new Date(),
+      });
 
       toast.success("Account Created Successfully!", {
         position: "top-right",
@@ -165,7 +176,7 @@ function UserSignUp() {
               Sign Up
             </button>
 
-            <p className="text-sm mt-6 text-center">
+            <p className="text-sm mt-6 text-center font-cousine">
               Already have an account? <a href="UserSignin" className="text-gray-800 font-semibold hover:underline">Sign In</a>
             </p>
           </form>

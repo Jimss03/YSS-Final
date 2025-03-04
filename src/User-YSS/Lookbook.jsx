@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { db, lookbookCollection } from '../Database/Firebase';  // Import Firestore collection
+import { db, lookbookCollection } from '../Database/Firebase';
 import { getDocs } from 'firebase/firestore';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 function Lookbook() {
   const [lookbooks, setLookbooks] = useState([]);
-  const [showModal, setShowModal] = useState(false);  // State for controlling modal visibility
-  const [currentImage, setCurrentImage] = useState('');  // State to store the current image to display in modal
-  const [currentLookbook, setCurrentLookbook] = useState(null);  // Store the current lookbook to access secondary images
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);  // Index to track current image in the modal
+  const [showModal, setShowModal] = useState(false);
+  const [currentImage, setCurrentImage] = useState('');
+  const [currentLookbook, setCurrentLookbook] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [activeCategory, setActiveCategory] = useState('All');
 
   useEffect(() => {
     const fetchLookbooks = async () => {
       try {
-        const querySnapshot = await getDocs(lookbookCollection); // Fetch data from Firestore
+        const querySnapshot = await getDocs(lookbookCollection);
         const lookbooksArray = [];
         querySnapshot.forEach((doc) => {
           lookbooksArray.push({ id: doc.id, ...doc.data() });
@@ -26,132 +28,226 @@ function Lookbook() {
     fetchLookbooks();
   }, []);
 
-  // Function to handle image click
-  const handleImageClick = (image, lookbook) => {
+  // Get unique categories from lookbooks, but exclude 'All' from the UI buttons
+  const categories = [...new Set(lookbooks.map(item => item.category).filter(Boolean))];
+
+  // Filter lookbooks by active category
+  const filteredLookbooks = activeCategory === 'All' 
+    ? lookbooks 
+    : lookbooks.filter(item => item.category === activeCategory);
+
+  const handleImageClick = (image, lookbook, index = 0) => {
     setCurrentImage(image);
     setCurrentLookbook(lookbook);
-    setCurrentImageIndex(0); // Reset the image index to show the main image first
+    setCurrentImageIndex(index);
     setShowModal(true);
   };
 
-  // Function to close the modal
   const closeModal = () => {
     setShowModal(false);
   };
 
-  // Function to go to the next image in the modal
   const nextImage = () => {
-    if (currentLookbook && currentLookbook.secondaryImages) {
-      if (currentImageIndex < currentLookbook.secondaryImages.length) {
-        setCurrentImageIndex((prevIndex) => prevIndex + 1); // Show the next secondary image
-      }
+    if (!currentLookbook) return;
+    
+    const totalImages = 1 + (currentLookbook.secondaryImages?.length || 0);
+    if (currentImageIndex < totalImages - 1) {
+      setCurrentImageIndex(prevIndex => prevIndex + 1);
+    } else {
+      setCurrentImageIndex(0); // Loop back to the first image
     }
   };
 
-  // Function to go to the previous image in the modal
   const prevImage = () => {
+    if (!currentLookbook) return;
+    
+    const totalImages = 1 + (currentLookbook.secondaryImages?.length || 0);
     if (currentImageIndex > 0) {
-      setCurrentImageIndex((prevIndex) => prevIndex - 1); // Show the previous image
+      setCurrentImageIndex(prevIndex => prevIndex - 1);
+    } else {
+      setCurrentImageIndex(totalImages - 1); // Loop to the last image
     }
+  };
+
+  const getCurrentImageSrc = () => {
+    if (!currentLookbook) return '';
+    
+    if (currentImageIndex === 0) {
+      return currentLookbook.image;
+    } else if (currentLookbook.secondaryImages && currentLookbook.secondaryImages[currentImageIndex - 1]) {
+      return currentLookbook.secondaryImages[currentImageIndex - 1];
+    }
+    return '';
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 mt-24">
-      {/* Title at the top */}
-      <h1 className="text-4xl font-semibold text-center mb-8">Lookbook</h1>
-
-      {/* Hero Image and Text */}
-      {lookbooks.length > 0 && (
-        <div className="flex items-center mb-8">
-          {/* Text on the left */}
-          <div className="w-1/2 pr-8">
-            <h2 className="text-3xl font-semibold mb-4">{lookbooks[0]?.name || 'Default Collection'}</h2>
-            <p className="text-lg mb-4">{lookbooks[0]?.description || 'Default description of the collection'}</p>
-          </div>
-
-          {/* Hero Image on the right */}
-          <div className="w-1/2">
-            <img
-              src={lookbooks[0]?.image || 'default-image-url'} // Default image if empty
-              alt="Main Lookbook"
-              className="w-full h-96 object-cover rounded-lg cursor-pointer"
-              onClick={() => handleImageClick(lookbooks[0]?.image, lookbooks[0])} // Open image in modal
+    <div className="bg-gray-50 min-h-screen">
+      {/* Hero Section */}
+      <div className="relative w-full h-96 bg-black overflow-hidden">
+        {lookbooks.length > 0 && (
+          <>
+            <img 
+              src={lookbooks[0]?.image || '/api/placeholder/1200/600'} 
+              alt="Featured Collection" 
+              className="w-full h-full object-cover opacity-70"
             />
-          </div>
-        </div>
-      )}
-
-      {/* Lookbook Items Grid */}
-      <h2 className="text-3xl font-semibold text-center mb-8">Lookbook Collection</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {lookbooks.map((lookbook) => (
-          <div key={lookbook.id} className="p-4 bg-white border border-gray-300 rounded-lg shadow-md hover:shadow-lg">
-            <img
-              src={lookbook.image}
-              alt={lookbook.name}
-              className="w-full h-56 object-cover rounded-lg cursor-pointer"
-              onClick={() => handleImageClick(lookbook.image, lookbook)}  // Open image in modal
-            />
-            <div className="mt-4 text-center">
-              <h3 className="text-xl font-semibold">{lookbook.name}</h3>
-              <p className="text-sm text-gray-600">{lookbook.description}</p>
+            <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-8 text-center">
+              <h1 className="text-5xl font-bold mb-4 tracking-wider font-cousine">LOOKBOOK</h1>
+              <p className="text-xl max-w-2xl">Spreading God's word through meaningful designs that inspire and uplift</p>
+              <button 
+                className="mt-8 px-6 py-3 bg-white text-black font-semibold rounded-md hover:bg-gray-200 transition duration-300"
+                onClick={() => document.getElementById('collection').scrollIntoView({behavior: 'smooth'})}
+              >
+                View Collection
+              </button>
             </div>
-          </div>
-        ))}
+          </>
+        )}
       </div>
 
-      {/* Modal for Full-Screen Image with Secondary Images */}
+      <div className="max-w-7xl mx-auto p-6 pt-12" id="collection">
+        {/* Category Filters - 'All' button removed */}
+        <div className="mb-12 flex justify-center">
+          <div className="inline-flex bg-white p-1 rounded-lg shadow">
+            {categories.map(category => (
+              <div
+                key={category}
+                onClick={() => setActiveCategory(category)}
+                className={`px-6 py-2 rounded-md text-sm font-medium transition-all cursor-pointer ${
+                  activeCategory === category
+                    ? 'bg-black text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {category}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Featured Item (if available) */}
+        {filteredLookbooks.length > 0 && (
+          <div className="mb-16 bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="flex flex-col md:flex-row">
+              <div className="md:w-1/2 h-96">
+                <img
+                  src={filteredLookbooks[0]?.image || '/api/placeholder/600/600'}
+                  alt={filteredLookbooks[0]?.name}
+                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105 cursor-pointer"
+                  onClick={() => handleImageClick(filteredLookbooks[0]?.image, filteredLookbooks[0])}
+                />
+              </div>
+              <div className="md:w-1/2 p-8 flex flex-col justify-center">
+                <h2 className="text-3xl font-bold font-cousine">{filteredLookbooks[0]?.name}</h2>
+                <div className="border-b-4 border-gray-900 my-6 w-20"></div>
+                <div className="flex space-x-4">
+                  <button 
+                    className="px-6 py-3 bg-black text-white font-semibold rounded-md hover:bg-gray-800 transition duration-300"
+                    onClick={() => handleImageClick(filteredLookbooks[0]?.image, filteredLookbooks[0])}
+                  >
+                    View Design
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Lookbook Items Grid */}
+        <h2 className="text-3xl font-bold text-center mb-8 font-cousine">Lookbook Collection</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filteredLookbooks.slice(1).map((lookbook) => (
+            <div key={lookbook.id} className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition duration-300">
+              <div className="relative overflow-hidden h-72">
+                <img
+                  src={lookbook.image}
+                  alt={lookbook.name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 cursor-pointer"
+                  onClick={() => handleImageClick(lookbook.image, lookbook)}
+                />
+                {lookbook.secondaryImages && lookbook.secondaryImages.length > 0 && (
+                  <div className="absolute bottom-4 right-4 px-2 py-1 bg-black text-white text-xs rounded">
+                    {1 + lookbook.secondaryImages.length} photos
+                  </div>
+                )}
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-2">{lookbook.name}</h3>
+                <button 
+                  className="w-full py-2 border-2 border-black text-black font-medium rounded hover:bg-black hover:text-white transition-colors duration-300"
+                  onClick={() => handleImageClick(lookbook.image, lookbook)}
+                >
+                  View Design
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Modal for Full-Screen Image */}
       {showModal && currentLookbook && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
-          <div className="relative max-w-7xl">
-            {/* Display the current image */}
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex justify-center items-center z-50">
+          <div className="relative w-full max-w-5xl px-4">
+            {/* Main image */}
             <img
-              src={
-                currentImageIndex === 0
-                  ? currentLookbook.image
-                  : currentLookbook.secondaryImages[currentImageIndex - 1]  // Display secondary images based on currentImageIndex
-              }
-              alt="Full screen"
-              className="w-full h-auto max-w-4xl max-h-screen object-contain"
+              src={getCurrentImageSrc()}
+              alt={currentLookbook.name}
+              className="w-full h-auto max-h-[80vh] object-contain mx-auto"
             />
 
-            {/* Navigation Buttons for Modal */}
-            <div className="absolute top-1/2 left-0 right-0 transform -translate-y-1/2 flex justify-between px-4 z-10">
-              <button
-                onClick={prevImage}
-                className="text-white text-4xl bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-75"
-              >
-                &#10094;
-              </button>
-              <button
-                onClick={nextImage}
-                className="text-white text-4xl bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-75"
-              >
-                &#10095;
-              </button>
+            {/* Image counter */}
+            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+              {currentImageIndex + 1} / {1 + (currentLookbook.secondaryImages?.length || 0)}
             </div>
 
-            {/* Close Button */}
-            <button
-              onClick={closeModal}
-              className="absolute top-4 right-4 bg-black text-white rounded-full p-2 hover:bg-gray-800 z-10"
+            {/* T-shirt details */}
+            <div className="absolute bottom-0 left-0 right-0 bg-white p-4 bg-opacity-95">
+              <h3 className="text-xl font-bold">{currentLookbook.name}</h3>
+            </div>
+
+            {/* Navigation */}
+            <div 
+              onClick={prevImage}
+              className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition duration-300 cursor-pointer"
             >
-              {/* Close Icon */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                className="w-6 h-6 text-white"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+              <ChevronLeft size={24} className="text-black" />
+            </div>
+            <div
+              onClick={nextImage}
+              className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition duration-300 cursor-pointer"
+            >
+              <ChevronRight size={24} className="text-black" />
+            </div>
+
+            {/* Thumbnail navigation (if there are secondary images) */}
+            {currentLookbook.secondaryImages && currentLookbook.secondaryImages.length > 0 && (
+              <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 flex space-x-2 overflow-x-auto py-2 max-w-full">
+                <div 
+                  className={`w-16 h-16 rounded-md overflow-hidden cursor-pointer border-2 ${currentImageIndex === 0 ? 'border-white' : 'border-transparent'}`}
+                  onClick={() => setCurrentImageIndex(0)}
+                >
+                  <img src={currentLookbook.image} alt="thumbnail" className="w-full h-full object-cover" />
+                </div>
+                {currentLookbook.secondaryImages.map((img, idx) => (
+                  <div 
+                    key={idx}
+                    className={`w-16 h-16 rounded-md overflow-hidden cursor-pointer border-2 ${currentImageIndex === idx + 1 ? 'border-white' : 'border-transparent'}`}
+                    onClick={() => setCurrentImageIndex(idx + 1)}
+                  >
+                    <img src={img} alt={`thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Close */}
+            <div
+              onClick={closeModal}
+              className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition duration-300 cursor-pointer"
+            >
+              <X size={24} className="text-black" />
+            </div>
           </div>
         </div>
       )}

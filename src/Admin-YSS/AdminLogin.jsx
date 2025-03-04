@@ -18,8 +18,9 @@ const AdminLogin = ({ logInHandler }) => {
 
     try {
       // Attempt to sign in
-      await signInWithEmailAndPassword(auth, email, password);
-
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
       // Show success toast if login is successful
       toast.success("Successfully Logged In!", {
         position: "top-right",
@@ -32,13 +33,14 @@ const AdminLogin = ({ logInHandler }) => {
         style: { backgroundColor: "#111", color: "#fff" },
       });
 
+      // Set the UID of the logged-in user
+      const userUID = user.uid;
+      logInHandler(userUID); // Store UID in your context or state
+
       // Navigate after 2 seconds
       setTimeout(() => {
         navigate("/Admindashboard");
       }, 2000);
-
-      // Call logInHandler after successful login
-      logInHandler();
 
     } catch (err) {
       console.error("Error code:", err.code);  // Log the error code

@@ -16,29 +16,38 @@ import AdminLookbook from './Admin-YSS/AdminLookbook';
 import AdminOrderManagement from './Admin-YSS/AdminOrderManagement';
 import AdminNavbar from './Admin-YSS/Admin-Layout/AdminNavbar';
 import { useState, useEffect } from 'react';
-import UserSIgnup from './User-YSS/UserSIgnup';
+import UserSignup from './User-YSS/UserSignup';
+import Checkout from './User-YSS/Checkout';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userUID, setUserUID] = useState(null);  // Add state for userUID
 
-  const logInHandler = () => {
+  const logInHandler = (uid) => {
     setIsLoggedIn(true);
+    setUserUID(uid);  // Set the userUID when logged in
   };
 
   const logOutHandler = () => {
     setIsLoggedIn(false);
+    setUserUID(null);  // Clear the userUID when logged out
   };
 
   useEffect(() => {
     const storedLogin = localStorage.getItem("isLoggedIn");
-    if (storedLogin === "true") {
+    const storedUID = localStorage.getItem("userUID");  // Store the userUID in localStorage
+    if (storedLogin === "true" && storedUID) {
       setIsLoggedIn(true);
+      setUserUID(storedUID);
     }
   }, []);
 
   useEffect(() => {
     localStorage.setItem("isLoggedIn", isLoggedIn);
-  }, [isLoggedIn]);
+    if (userUID) {
+      localStorage.setItem("userUID", userUID);  // Save userUID to localStorage
+    }
+  }, [isLoggedIn, userUID]);
 
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -51,8 +60,9 @@ function App() {
           <Route path="contact" element={<Contact />} />
           <Route path="faq" element={<FAQ />} />
           <Route path="lookbook" element={<Lookbook />} />
-          <Route path="UserSignIn" element={<UserSignIn />} />
-          <Route path="UserSignUp" element={<UserSIgnup />} />
+          <Route path="Checkout" element={<Checkout/>} />
+          <Route path="UserSignIn" element={<UserSignIn logInHandler={logInHandler} />} />
+          <Route path="UserSignUp" element={<UserSignup />} />
         </Route>
 
         {/* Admin Login Route */}
@@ -73,7 +83,7 @@ function App() {
   );
 
   return (
-    <CartProvider>
+    <CartProvider userUID={userUID}>  {/* Pass userUID to CartProvider */}
       <RouterProvider router={router} />
     </CartProvider>
   );

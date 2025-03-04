@@ -5,7 +5,7 @@ import { useCart } from '../Layout/CartContext'; // Import the custom CartContex
 import CloseIcon from '../assets/Shop-Images/Multiply.png'; 
 import { ShoppingCart, User } from "lucide-react";
 
-function NavBar() {
+function NavbarLayout() {
   const location = useLocation(); // Hook to track the current location
   const { cartItems, removeFromCart, updateCartItemQuantity } = useCart();  // Access cartItems and functions
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -129,8 +129,8 @@ function NavBar() {
         </nav>
       </header>
 
-      {/* Cart Modal */}
-      {isCartOpen && (
+  {/* Cart Modal */}
+    {isCartOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-end z-50">
           <div className="w-[400px] bg-white h-full shadow-lg p-6 flex flex-col relative">
             <button onClick={() => setIsCartOpen(false)} className="absolute top-4 right-4">
@@ -144,33 +144,33 @@ function NavBar() {
               <p className="text-gray-600 text-center">Your cart is empty.</p>
             ) : (
               <div className="flex-1 overflow-y-auto">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between mb-6">
-                    <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
-                    <div className="flex-1 px-4">
-                      <p className="text-sm font-semibold">{item.name}</p>
-                      <p className="text-xs text-gray-500">₱{item.price}</p>
-                      <p className="text-xs text-gray-500">Size: {item.size}</p>
-                    </div>
-                    <div className="flex items-center border rounded-md px-2">
-                      <button
-                        className="text-lg text-gray-700 px-2"
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                        disabled={item.quantity <= 1}
-                      >
-                        −
-                      </button>
-                      <span className="text-sm font-semibold px-2">{item.quantity}</span>
-                      <button
-                        className="text-lg text-gray-700 px-2"
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                      >
-                        +
-                      </button>
-                    </div>
-                    <button onClick={() => handleRemove(item.id)} className="text-red-500 p-3">Remove</button>
+              {cartItems.map((item) => (
+                <div key={`${item.id}-${item.name}`} className="flex items-center justify-between mb-6">
+                  <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
+                  <div className="flex-1 px-4">
+                    <p className="text-sm font-semibold">{item.name}</p>
+                    <p className="text-xs text-gray-500">₱{item.price}</p>
+                    <p className="text-xs text-gray-500">Size: {item.size}</p>
                   </div>
-                ))}
+                  <div className="flex items-center border rounded-md px-2">
+                    <button
+                      className="text-lg text-gray-700 px-2"
+                      onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                      disabled={item.quantity <= 1}
+                    >
+                      −
+                    </button>
+                    <span className="text-sm font-semibold px-2">{item.quantity}</span>
+                    <button
+                      className="text-lg text-gray-700 px-2"
+                      onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                    >
+                      +
+                    </button>
+                  </div>
+                  <button onClick={() => handleRemove(item.id)} className="text-red-500 p-3">Remove</button>
+                </div>
+              ))}
               </div>
             )}
             
@@ -200,4 +200,4 @@ function NavBar() {
   );
 }
 
-export default NavBar;
+export default NavbarLayout;

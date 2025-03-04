@@ -1,31 +1,40 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../Database/Firebase";
+import { auth } from "../Database/Firebase"; // Firebase Authentication
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import backgroundImage from "../assets/SignIn-Images/SignIn.png";
+import { useCart } from "../Layout/CartContext"; // Make sure the path is correct
+
 
 function UserSignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-
+  const { setUserUID } = useCart(); // Access to set the userUID
+  // Toggle password visibility
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };
 
+  // Handle sign-in
   const handleSignIn = async (e) => {
     e.preventDefault();
-
+  
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      const userUID = user.uid;
+  
+      // Set the user UID in the Cart Context
+      setUserUID(userUID);
+  
       toast.success("Sign In Successful!", {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 1000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -33,10 +42,24 @@ function UserSignIn() {
         theme: "dark",
         style: { backgroundColor: "#111", color: "#fff" },
       });
-
+  
+      // Redirect to the dashboard or home page after successful sign-in
       setTimeout(() => navigate("/dashboard"), 3500);
     } catch (error) {
-      toast.error("Invalid email or password!", {
+      console.error(error);  // Log the error for debugging
+      let errorMessage;
+      switch (error.code) {
+        case "auth/user-not-found":
+          errorMessage = "User not found! Please check your email.";
+          break;
+        case "auth/wrong-password":
+          errorMessage = "Incorrect password! Please try again.";
+          break;
+        default:
+          errorMessage = "An error occurred during sign-in.";
+      }
+  
+      toast.error(errorMessage, {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -44,16 +67,17 @@ function UserSignIn() {
         pauseOnHover: true,
         draggable: true,
         theme: "dark",
-        icon: "❌", // Adding an error icon
+        icon: "❌",
         style: { backgroundColor: "#111", color: "#fff" },
       });
     }
   };
+  
 
   return (
     <div className="flex min-h-screen bg-gray-100 md:flex-row flex-col-reverse">
       <ToastContainer />
-      
+
       {/* Left Side - Sign In Form */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg mt-10">
