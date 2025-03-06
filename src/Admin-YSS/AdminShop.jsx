@@ -308,8 +308,8 @@ function AdminShop() {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2 font-cousine">SHOP MANAGEMENT</h1>
+      <div className="">
+        <h1 className="text-3xl font-bold text-gray-800 mb-2 font-cousine ">SHOP MANAGEMENT</h1>
       </div>
       
       {/* Filters and Actions */}
@@ -327,6 +327,7 @@ function AdminShop() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
             />
+            
           </div>
 
           <div className="flex flex-wrap md:flex-nowrap items-center gap-3">

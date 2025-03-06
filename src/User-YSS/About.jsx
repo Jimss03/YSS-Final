@@ -3,7 +3,7 @@ import backgroundpicture  from '../../src/assets/About-Images/BackgroundAboutUsi
 
 function About() {
   return (
-    <div className="min-h-screen bg-[#FAFAFA] pt-16"> {/* Added pt-16 to account for navbar height */}
+    <div className="min-h-screen bg-[#FAFAFA] pt-9"> {/* Added pt-16 to account for navbar height */}
       {/* Main Wrapper to Center Content */}
       <div className="mx-auto">
         {/* About Us Section */}

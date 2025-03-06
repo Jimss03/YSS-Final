@@ -1,30 +1,44 @@
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import Footer from './FooterLayout';
-import { useCart } from '../Layout/CartContext'; // Import the custom CartContext hook
-import CloseIcon from '../assets/Shop-Images/Multiply.png'; 
-import { ShoppingCart, User } from "lucide-react";
+import { useCart } from '../Layout/CartContext';
+import { ShoppingCart, User, Menu, X } from "lucide-react";
 
 function NavbarLayout() {
-  const location = useLocation(); // Hook to track the current location
-  const { cartItems, removeFromCart, updateCartItemQuantity } = useCart();  // Access cartItems and functions
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { cartItems } = useCart();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  // Check if the current location is either /about, /contact, or /FAQ
+  // Check if current location is /about, /contact, or /FAQ
   const isAboutActive = location.pathname === '/about' || location.pathname === '/contact' || location.pathname === '/FAQ';
 
-  const handleRemove = (itemId) => {
-    removeFromCart(itemId);
+  // Function to handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth >= 768) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleUpdateQuantity = (itemId, quantity) => {
-    updateCartItemQuantity(itemId, quantity);
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
   };
 
   return (
     <>
       <header className="fixed top-0 left-0 w-full bg-white shadow-lg z-20">
-        <nav className="container mx-auto flex justify-between items-center h-16">
+        <nav className="container mx-auto flex justify-between items-center h-18 px-4">
           {/* Logo */}
           <div className="flex items-center space-x-2">
             <NavLink to="/" className="flex items-center">
@@ -36,14 +50,12 @@ function NavbarLayout() {
             </NavLink>
           </div>
 
-          {/* Navigation Links */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 flex space-x-6">
+          {/* Desktop Navigation Links */}
+          <div className="hidden md:flex absolute left-1/2 transform -translate-x-1/2 space-x-6">
             <NavLink
               to="/"
               className={({ isActive }) =>
-                `nav-link flex items-center justify-center h-16 px-4 font-cousine font-bold text-center transition-all ease-in-out duration-300 ${
-                  isActive ? 'text-gray-700 border-b-2 border-gray-700' : 'hover:text-gray-500 border-b-2 border-transparent hover:border-gray-700'
-                }`
+                `nav-link flex items-center justify-center h-16 px-4 font-cousine font-bold text-center transition-all ease-in-out duration-300 ${isActive ? 'text-gray-700 border-b-2 border-gray-700' : 'hover:text-gray-500 border-b-2 border-transparent hover:border-gray-700'}`  
               }
             >
               HOME
@@ -52,9 +64,7 @@ function NavbarLayout() {
             <NavLink
               to="/Shop"
               className={({ isActive }) =>
-                `nav-link flex items-center justify-center h-16 px-4 font-cousine font-bold text-center transition-all ease-in-out duration-300 ${
-                  isActive ? 'text-gray-700 border-b-2 border-gray-700' : 'hover:text-gray-500 border-b-2 border-transparent hover:border-gray-700'
-                }`
+                `nav-link flex items-center justify-center h-16 px-4 font-cousine font-bold text-center transition-all ease-in-out duration-300 ${isActive ? 'text-gray-700 border-b-2 border-gray-700' : 'hover:text-gray-500 border-b-2 border-transparent hover:border-gray-700'}`  
               }
             >
               SHOP
@@ -64,9 +74,7 @@ function NavbarLayout() {
             <div className="relative group">
               <NavLink
                 to="/about"
-                className={`nav-link flex items-center justify-center h-16 px-4 font-cousine font-bold text-center transition-all ease-in-out duration-300 ${
-                  isAboutActive ? 'text-gray-700 border-b-2 border-gray-700' : 'hover:text-gray-500 border-b-2 border-transparent hover:border-gray-700'
-                }`}
+                className={`nav-link flex items-center justify-center h-16 px-4 font-cousine font-bold text-center transition-all ease-in-out duration-300 ${isAboutActive ? 'text-gray-700 border-b-2 border-gray-700' : 'hover:text-gray-500 border-b-2 border-transparent hover:border-gray-700'}`}
               >
                 ABOUT US
               </NavLink>
@@ -95,103 +103,125 @@ function NavbarLayout() {
             <NavLink
               to="/lookbook"
               className={({ isActive }) =>
-                `nav-link flex items-center justify-center h-16 px-4 font-cousine font-bold text-center transition-all ease-in-out duration-300 ${
-                  isActive ? 'text-gray-700 border-b-2 border-gray-700' : 'hover:text-gray-500 border-b-2 border-transparent hover:border-gray-700'
-                }`
+                `nav-link flex items-center justify-center h-16 px-4 font-cousine font-bold text-center transition-all ease-in-out duration-300 ${isActive ? 'text-gray-700 border-b-2 border-gray-700' : 'hover:text-gray-500 border-b-2 border-transparent hover:border-gray-700'}`  
               }
             >
               LOOKBOOK
             </NavLink>
           </div>
 
-          <div className="flex items-center">
-      {/* Cart Icon with Hover Effect */}
-      <button
-        onClick={() => setIsCartOpen(true)}
-        className="flex items-center justify-center h-16 px-4 relative transition-all ease-in-out duration-300 hover:text-gray-500 border-b-2 border-transparent hover:border-gray-700"
-      >
-        <ShoppingCart size={24} className="text-black" />
-        {cartItems.length > 0 && (
-          <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">
-            {cartItems.length}
-          </span>
-        )}
-      </button>
+          {/* Mobile Menu Button */}
+          <button 
+            className="md:hidden flex items-center"
+            onClick={toggleMobileMenu}
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? 
+              <X size={24} className="text-black" /> : 
+              <Menu size={24} className="text-black" />
+            }
+          </button>
 
-      {/* Account Icon with Hover Effect */}
-      <NavLink
-        to="/UserSignIn"
-        className="flex items-center justify-center h-16 px-4 relative transition-all ease-in-out duration-300 hover:text-gray-500 border-b-2 border-transparent hover:border-gray-700"
-      >
-        <User size={24} className="text-black" />
-      </NavLink>
-    </div>
+          <div className="flex items-center">
+
+            {/* Cart Icon with Hover Effect and Active Line */}
+            <NavLink
+              to="/cart"
+              className={({ isActive }) =>
+                `relative flex items-center justify-center h-16 px-2 md:px-4 ${
+                  isActive
+                    ? 'text-gray-700 border-b-2 border-gray-700' // Active state
+                    : 'hover:text-gray-500 border-b-2 border-transparent hover:border-gray-700' // Hover state
+                }`
+              }
+            >
+              <ShoppingCart size={24} className="text-black" />
+              {cartItems.length > 0 && (
+                <span className="absolute top-0 right-0 bg-black text-white text-xs rounded-full px-1">
+                  {cartItems.length}
+                </span>
+              )}
+            </NavLink>
+
+            {/* Account Icon with Hover Effect and Active Line */}
+            <NavLink
+              to="/UserSignIn"
+              className={({ isActive }) =>
+                `flex items-center justify-center h-16 px-2 md:px-4 relative transition-all ease-in-out duration-300 ${isActive ? 'text-gray-700 border-b-2 border-gray-700' : 'hover:text-gray-500 border-b-2 border-transparent hover:border-gray-700'}`
+              }
+            >
+              <User size={24} className="text-black" />
+            </NavLink>
+          </div>
         </nav>
+
+        {/* Mobile Navigation Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden bg-white shadow-lg absolute w-full z-30">
+            <div className="flex flex-col py-2">
+              <NavLink
+                to="/"
+                className={({ isActive }) =>
+                  `px-6 py-3 font-cousine font-bold ${isActive ? 'text-gray-700 bg-gray-100' : 'text-gray-700'}` 
+                }
+                onClick={closeMobileMenu}
+              >
+                HOME
+              </NavLink>
+              <NavLink
+                to="/Shop"
+                className={({ isActive }) =>
+                  `px-6 py-3 font-cousine font-bold ${isActive ? 'text-gray-700 bg-gray-100' : 'text-gray-700'}` 
+                }
+                onClick={closeMobileMenu}
+              >
+                SHOP
+              </NavLink>
+              <NavLink
+                to="/about"
+                className={({ isActive }) =>
+                  `px-6 py-3 font-cousine font-bold ${isAboutActive ? 'text-gray-700 bg-gray-100' : 'text-gray-700'}` 
+                }
+                onClick={closeMobileMenu}
+              >
+                ABOUT US
+              </NavLink>
+              <div className="pl-6 bg-gray-50">
+                <NavLink
+                  to="/contact"
+                  className={({ isActive }) =>
+                    `block px-6 py-2 text-gray-600 ${isActive ? 'font-semibold' : ''}` 
+                  }
+                  onClick={closeMobileMenu}
+                >
+                  Contact Us
+                </NavLink>
+                <NavLink
+                  to="/FAQ"
+                  className={({ isActive }) =>
+                    `block px-6 py-2 text-gray-600 ${isActive ? 'font-semibold' : ''}` 
+                  }
+                  onClick={closeMobileMenu}
+                >
+                  FAQ
+                </NavLink>
+              </div>
+              <NavLink
+                to="/lookbook"
+                className={({ isActive }) =>
+                  `px-6 py-3 font-cousine font-bold ${isActive ? 'text-gray-700 bg-gray-100' : 'text-gray-700'}` 
+                }
+                onClick={closeMobileMenu}
+              >
+                LOOKBOOK
+              </NavLink>
+            </div>
+          </div>
+        )}
       </header>
 
-  {/* Cart Modal */}
-    {isCartOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-end z-50">
-          <div className="w-[400px] bg-white h-full shadow-lg p-6 flex flex-col relative">
-            <button onClick={() => setIsCartOpen(false)} className="absolute top-4 right-4">
-              <img src={CloseIcon} alt="Close" className="w-8 h-8 cursor-pointer" />
-            </button>
-            <h2 className="text-xl font-bold tracking-wider mb-6 font-cousine">Your Cart</h2>
-            <hr className="mb-4" />
-            
-            {/* Cart Items */}
-            {cartItems.length === 0 ? (
-              <p className="text-gray-600 text-center">Your cart is empty.</p>
-            ) : (
-              <div className="flex-1 overflow-y-auto">
-              {cartItems.map((item) => (
-                <div key={`${item.id}-${item.name}`} className="flex items-center justify-between mb-6">
-                  <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
-                  <div className="flex-1 px-4">
-                    <p className="text-sm font-semibold">{item.name}</p>
-                    <p className="text-xs text-gray-500">₱{item.price}</p>
-                    <p className="text-xs text-gray-500">Size: {item.size}</p>
-                  </div>
-                  <div className="flex items-center border rounded-md px-2">
-                    <button
-                      className="text-lg text-gray-700 px-2"
-                      onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                      disabled={item.quantity <= 1}
-                    >
-                      −
-                    </button>
-                    <span className="text-sm font-semibold px-2">{item.quantity}</span>
-                    <button
-                      className="text-lg text-gray-700 px-2"
-                      onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                    >
-                      +
-                    </button>
-                  </div>
-                  <button onClick={() => handleRemove(item.id)} className="text-red-500 p-3">Remove</button>
-                </div>
-              ))}
-              </div>
-            )}
-            
-            <hr className="my-4" />
-            <div className="flex justify-between text-lg font-semibold">
-              <span>ESTIMATED TOTAL:</span>
-              <span>₱{cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)} PHP</span>
-            </div>
-
-            {/* Checkout Button */}
-            {cartItems.length > 0 && (
-              <button className="bg-black text-white text-center w-full py-3 mt-6 uppercase tracking-wide font-bold text-sm">
-                CHECK OUT
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Content */}
-      <div className="pt-50">
+      {/* Content with padding for fixed header */}
+      <div className="flex-grow">
         <Outlet />
       </div>
 

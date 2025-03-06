@@ -105,7 +105,7 @@ function Lookbook() {
         )}
       </div>
 
-      <div className="max-w-7xl mx-auto p-6 pt-12" id="collection">
+      <div className="max-w-7xl mx-auto" id="collection">
         {/* Category Filters - 'All' button removed */}
         <div className="mb-12 flex justify-center">
           <div className="inline-flex bg-white p-1 rounded-lg shadow">

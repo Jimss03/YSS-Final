@@ -18,6 +18,7 @@ import AdminNavbar from './Admin-YSS/Admin-Layout/AdminNavbar';
 import { useState, useEffect } from 'react';
 import UserSignup from './User-YSS/UserSignup';
 import Checkout from './User-YSS/Checkout';
+import Cart from './User-YSS/Cart';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -60,11 +61,13 @@ function App() {
           <Route path="contact" element={<Contact />} />
           <Route path="faq" element={<FAQ />} />
           <Route path="lookbook" element={<Lookbook />} />
-          <Route path="Checkout" element={<Checkout/>} />
+          <Route path='cart' element={<Cart />} />
+          <Route path="checkout" element={<Checkout/>} />
           <Route path="UserSignIn" element={<UserSignIn logInHandler={logInHandler} />} />
           <Route path="UserSignUp" element={<UserSignup />} />
-        </Route>
 
+        </Route>
+      
         {/* Admin Login Route */}
         <Route path="/admin" element={<AdminLogin logInHandler={logInHandler} />} />
         
@@ -83,7 +86,7 @@ function App() {
   );
 
   return (
-    <CartProvider userUID={userUID}>  {/* Pass userUID to CartProvider */}
+    <CartProvider userUID={userUID}>  
       <RouterProvider router={router} />
     </CartProvider>
   );
