@@ -89,13 +89,13 @@ function Lookbook() {
             <img 
               src={lookbooks[0]?.image || '/api/placeholder/1200/600'} 
               alt="Featured Collection" 
-              className="w-full h-full object-cover opacity-70"
+              className="w-full h-full object-cover opacity-40"
             />
             <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-8 text-center">
-              <h1 className="text-5xl font-bold mb-4 tracking-wider font-cousine">LOOKBOOK</h1>
-              <p className="text-xl max-w-2xl">Spreading God's word through meaningful designs that inspire and uplift</p>
+              <h1 className="text-5xl font-bold mb-4 tracking-wider font-cousine ">LOOKBOOK</h1>
+              <p className="text-xl max-w-2xl font-semibold ">Spreading God's word through meaningful designs that inspire and uplift</p>
               <button 
-                className="mt-8 px-6 py-3 bg-white text-black font-semibold rounded-md hover:bg-gray-200 transition duration-300"
+                className="mt-10 px-6 py-3 bg-white text-black font-semibold rounded-md hover:bg-gray-200 transition duration-300 font-cousine"
                 onClick={() => document.getElementById('collection').scrollIntoView({behavior: 'smooth'})}
               >
                 View Collection
@@ -142,7 +142,7 @@ function Lookbook() {
                 <div className="border-b-4 border-gray-900 my-6 w-20"></div>
                 <div className="flex space-x-4">
                   <button 
-                    className="px-6 py-3 bg-black text-white font-semibold rounded-md hover:bg-gray-800 transition duration-300"
+                    className="px-6 py-3 bg-black text-white font-semibold rounded-md hover:bg-gray-800 transition duration-300 font-cousine"
                     onClick={() => handleImageClick(filteredLookbooks[0]?.image, filteredLookbooks[0])}
                   >
                     View Design
@@ -174,7 +174,7 @@ function Lookbook() {
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-2">{lookbook.name}</h3>
                 <button 
-                  className="w-full py-2 border-2 border-black text-black font-medium rounded hover:bg-black hover:text-white transition-colors duration-300"
+                  className="w-full py-2 border-2 border-black text-black font-medium rounded hover:bg-black hover:text-white transition-colors duration-300 font-cousine"
                   onClick={() => handleImageClick(lookbook.image, lookbook)}
                 >
                   View Design

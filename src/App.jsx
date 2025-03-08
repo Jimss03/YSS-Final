@@ -19,6 +19,7 @@ import { useState, useEffect } from 'react';
 import UserSignup from './User-YSS/UserSignup';
 import Checkout from './User-YSS/Checkout';
 import Cart from './User-YSS/Cart';
+import AdminQoutes from './Admin-YSS/AdminQuotes';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -77,6 +78,7 @@ function App() {
           <Route path="adminshop" element={<AdminShop />} />
           <Route path="adminlookbook" element={<AdminLookbook />} />
           <Route path="adminordermanagement" element={<AdminOrderManagement />} />
+          <Route path='adminquotes' element={<AdminQoutes />} />
         </Route>
 
         {/* Catch-all route for non-existent paths */}

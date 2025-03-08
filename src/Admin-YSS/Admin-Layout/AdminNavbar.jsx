@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, ShoppingCart, Image, PackageCheck, LogOut } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, Image, PackageCheck, LogOut, FileText } from "lucide-react"; // Added FileText icon
 import { signOut } from "firebase/auth";
 import { auth } from "../../Database/Firebase";
 import Logo from "../admin-assets/admin-logo.png";
@@ -86,6 +86,20 @@ function AdminNavbar({ logOutHandler }) {
           >
             <PackageCheck className="w-6 h-6" aria-hidden="true" />
             <span className="text-sm">ORDER MANAGEMENT</span>
+          </NavLink>
+
+          {/* Quote Management Link */}
+          <NavLink
+            to="adminquotes"
+            end
+            className={({ isActive }) =>
+              `group flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-300 ${
+                isActive ? "bg-gray-500 text-white" : "hover:bg-gray-600"
+              }`
+            }
+          >
+            <FileText className="w-6 h-6" aria-hidden="true" />
+            <span className="text-sm">QUOTE MANAGEMENT</span>
           </NavLink>
         </nav>
 

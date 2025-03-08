@@ -23,7 +23,7 @@ function Footer() {
               </p>
               <div className="flex space-x-6">
                   <a
-                    href="https://facebook.com"
+                    href="https://www.facebook.com/young.soul.seekers"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-black hover:text-gray-800 text-3xl"
@@ -32,7 +32,7 @@ function Footer() {
                     <i className="fab fa-facebook"></i>
                   </a>
                   <a
-                    href="https://tiktok.com"
+                    href="https://www.tiktok.com/@young.soul.seekers"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-black hover:text-gray-800 text-3xl"
@@ -41,7 +41,7 @@ function Footer() {
                     <i className="fab fa-tiktok"></i>
                   </a>
                   <a
-                    href="https://instagram.com"
+                    href="https://www.instagram.com/young.soul.seekers/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-black hover:text-gray-800 text-3xl"

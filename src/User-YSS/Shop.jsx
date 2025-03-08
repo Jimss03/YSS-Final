@@ -7,6 +7,9 @@
   import { ShoppingCart, CheckCircle, ChevronLeft, ChevronRight, Search } from "lucide-react";
   import { getAuth, onAuthStateChanged } from "firebase/auth";
   import { addToCart } from "../Database/Firebase";  
+  import { useNavigate } from 'react-router-dom';
+
+  
 
   function Shop() {
     const [products, setProducts] = useState([]);
@@ -25,8 +28,8 @@
     const auth = getAuth();
     const userUID = auth.currentUser ? auth.currentUser.uid : null;
     const [showSignInModal, setShowSignInModal] = useState(false);
-
-
+    const navigate = useNavigate();
+    
 
     // Fetch Products from Firestore
     useEffect(() => {
@@ -165,6 +168,36 @@
       if (!selectedProduct) return;
       const allImages = [...(selectedProduct.image || []), ...(selectedProduct.secondaryImages || [])];
       setCurrentImageIndex((prevIndex) => (prevIndex - 1 + allImages.length) % allImages.length);
+    };
+
+    const handleCheckout = () => {
+      // Check if user is logged in
+      if (!userUID) {
+        setShowSignInModal(true);
+        return;
+      }
+    
+      // If user is checking out from the product modal, add that product to cart first
+      if (showModal && selectedProduct) {
+        const cartItem = {
+          id: selectedProduct.id,
+          name: selectedProduct.name,
+          price: selectedProduct.price,
+          size: selectedProduct.size,
+          quantity: selectedProduct.quantity,
+          image: selectedProduct.image[0],
+        };
+        
+        addToCart(userUID, cartItem);
+      }
+      
+      // Navigate to checkout page where it will fetch the updated cart data from Firebase
+      navigate('/checkout');
+      
+      // Close the modal if it's open
+      if (showModal) {
+        setShowModal(false);
+      }
     };
 
 
@@ -307,7 +340,7 @@
                   <p className="text-gray-900 font-medium text-lg">₱{product.price}</p>
                   <button 
                     onClick={() => handleImageClick(product)}
-                    className="text-black hover:underline flex items-center"
+                    className="text-black hover:underline flex items-center font-bold font-cousine"
                   >
                     Details
                   </button>
@@ -515,11 +548,19 @@
                   <div className="flex flex-col gap-3">
 
                     <button 
-                      className="bg-black text-white w-full py-3 rounded-md hover:bg-gray-800 transition font-medium flex items-center justify-center gap-2"
+                      className="bg-black text-white w-full py-4 rounded-md hover:bg-gray-500 transition font-medium flex items-center justify-center gap-2"
                       onClick={handleAddToCart}
                     >
                       <ShoppingCart size={18} />
                       Add To Cart
+                    </button>
+
+                    <button 
+                       className="border-2 border-black text-black w-full py-3 rounded-md hover:bg-black hover:text-white transition font-medium flex items-center justify-center gap-2"
+                      onClick={handleCheckout}
+                    >
+                      <CheckCircle size={18} />
+                      Checkout
                     </button>
 
                   </div>

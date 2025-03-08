@@ -4,6 +4,7 @@ import Footer from './FooterLayout';
 import { useCart } from '../Layout/CartContext';
 import { ShoppingCart, User, Menu, X } from "lucide-react";
 
+
 function NavbarLayout() {
   const location = useLocation();
   const navigate = useNavigate();

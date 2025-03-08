@@ -1,7 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, onSnapshot, getDoc, updateDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, onSnapshot, getDoc, updateDoc, } from "firebase/firestore";
 import { getDatabase, ref, set } from "firebase/database";
+import axios from 'axios';
 
 // ✅ Firebase Configuration
 const firebaseConfig = {
@@ -26,13 +27,15 @@ export const realtimeDB = getDatabase(app); // Realtime Database
 // ✅ Firestore Collections
 export const lookbookCollection = collection(db, "lookbook"); // Lookbook Collection
 export const shopCollection = collection(db, "shop"); // Shop Collection
-export const userCartsCollection = (uid) => collection(db, "userCarts", uid, "cartItems"); // 🛒 User's Cart Collection
+export const userCartsCollection = (uid) => collection(db, "userCarts", uid, "cartItems"); 
 export const userRef = (uid) => doc(db, "users", uid); // User data reference
+export const quotesCollection = collection(db, "quotes");
 
 // ✅ Cloudinary Configuration
 export const CLOUDINARY_CLOUD_NAME = "dm97yk6vr"; // Your Cloud Name
 export const CLOUDINARY_UPLOAD_PRESET_PRODUCT = "product_shop"; // Upload preset for product images
 export const CLOUDINARY_UPLOAD_PRESET_LOOKBOOK = "lookbook_images"; // Upload preset for Lookbook images
+export const CLOUDINARY_UPLOAD_PRESET_QUOTES = "quotes_images";
 export const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`; // Cloudinary API URL
 
 // ✅ Firestore CRUD Functions with error handling
@@ -155,5 +158,84 @@ export const onCartUpdate = (uid, callback) => {
   });
 };
 
-// Export default firebase app instance
+
+
+export const uploadQuoteImageToCloudinary = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file); // The image file
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET_QUOTES); // Upload preset for quotes
+    formData.append('cloud_name', CLOUDINARY_CLOUD_NAME); // Your Cloudinary cloud name
+
+    const response = await axios.post(CLOUDINARY_UPLOAD_URL, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    // Check if the response contains a secure URL
+    if (response.data && response.data.secure_url) {
+      return response.data.secure_url; // Return the image URL after successful upload
+    } else {
+      throw new Error('Image upload failed: Missing secure URL in response');
+    }
+  } catch (error) {
+    console.error('Error uploading quote image to Cloudinary:', error.message);
+    // Return a meaningful error message if upload fails
+    return null;
+  }
+};
+
+
+// ✅ Firestore CRUD Functions with error handling
+
+// Add Quote to Firestore with Image URL (Cloudinary)
+export const addQuoteToFirestore = async (quoteData) => {
+  try {
+    await addDoc(quotesCollection, quoteData);  // Add to 'quotes' collection in Firestore
+    console.log("Quote added to Firestore");
+  } catch (error) {
+    console.error("Error adding quote to Firestore:", error);
+  }
+};
+
+export const deleteQuoteFromFirestore = async (quoteId) => {
+  try {
+    const quoteDocRef = doc(db, "quotes", quoteId); // Reference to the quote document to delete
+    await deleteDoc(quoteDocRef); // Delete the document from Firestore
+    console.log('Quote deleted from Firestore');
+  } catch (error) {
+    console.error('Error deleting quote from Firestore:', error);
+  }
+};
+
+export const getQuotesFromFirestore = async () => {
+  try {
+    const querySnapshot = await getDocs(quotesCollection);
+
+    // Map over the query snapshot to get the data from each document
+    const quotes = querySnapshot.docs.map((doc) => ({
+      id: doc.id, // Get the document ID
+      ...doc.data(), // Get the document data
+    }));
+
+    return quotes; // Return the array of quotes
+  } catch (error) {
+    console.error('Error fetching quotes from Firestore:', error);
+    return []; // Return an empty array in case of error
+  }
+};
+
+export const updateQuoteInFirestore = async (quoteId, updatedQuote) => {
+  try {
+    const quoteDocRef = doc(db, "quotes", quoteId); // Reference to the specific quote document
+    await updateDoc(quoteDocRef, updatedQuote); // Update the document in Firestore
+    console.log('Quote updated in Firestore');
+  } catch (error) {
+    console.error('Error updating quote in Firestore:', error);
+  }
+};
+
+
+
 export default app;

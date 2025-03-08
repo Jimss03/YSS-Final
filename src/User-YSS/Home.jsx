@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import "tailwindcss/tailwind.css"
+import { getQuotesFromFirestore } from '../Database/Firebase'; // Import Firestore function for fetching quotes
 
 // Import images
 import slide1 from "../assets/Home-Images/carousel1.png"
@@ -14,14 +15,6 @@ import premiumTeesImg from "../assets/Home-Images/premuim-tees.png"
 import basicTeesImg from "../assets/Home-Images/basic-tees.png"
 import newProductsImg from "../assets/Home-Images/new-product.png"
 
-// Quote Images
-import quote1 from "../assets/Home-Images/quote1.png"
-import quote2 from "../assets/Home-Images/quote2.png"
-import quote3 from "../assets/Home-Images/quote3.png"
-import quote4 from "../assets/Home-Images/quote4.png"
-import quote5 from "../assets/Home-Images/quote5.png"
-import quote6 from "../assets/Home-Images/quote6.png"
-
 const images = [
   { src: slide1, alt: "Young Soul Seekers" },
   { src: slide2, alt: "All The Time" },
@@ -29,19 +22,14 @@ const images = [
   { src: slide4, alt: "God First" },
 ]
 
-// Replace the quotes array definition with this:
-
-
 function Home() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [quoteIndex, setQuoteIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [quotes, setQuotes] = useState([]) // State to hold quotes data
   const carouselRef = useRef(null)
 
-
-  const quotes = [quote1, quote2, quote3, quote4, quote5, quote6,]
-
-  
+  // Auto-rotate main carousel
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length)
@@ -49,77 +37,73 @@ function Home() {
     return () => clearInterval(interval)
   }, [])
 
-  // Replace the nextQuote function with this:
-  const nextQuote = () => {
-    if (isAnimating) return
-    setIsAnimating(true)
+  // Fetch quotes from Firestore
+  useEffect(() => {
+    const fetchQuotes = async () => {
+      try {
+        const fetchedQuotes = await getQuotesFromFirestore(); // Fetch quotes from Firestore
+        setQuotes(fetchedQuotes);
+      } catch (error) {
+        console.error('Error fetching quotes:', error);
+      }
+    };
 
-    // Apply animation class
+    fetchQuotes();
+  }, []);
+
+  // Handle next quote
+  const nextQuote = () => {
+    if (isAnimating || quoteIndex >= quotes.length - 3) return;
+    setIsAnimating(true);
+
     if (carouselRef.current) {
-      carouselRef.current.style.transform = "translateX(-33.33%)"
+      carouselRef.current.style.transition = "transform 300ms ease-in-out";
+      carouselRef.current.style.transform = "translateX(-33.33%)";
     }
 
-    // After animation completes, reset position and update index
     setTimeout(() => {
-      // Update the index without modulo to allow continuous scrolling
-      setQuoteIndex((prevIndex) => {
-        // If we're at the end of the original quotes, don't reset
-        // but continue with the duplicated quotes
-        if (prevIndex >= quotes.length - 4) {
-          return prevIndex + 1
-        }
-        return (prevIndex + 1) % (quotes.length - 2)
-      })
+      setQuoteIndex(prevIndex => prevIndex + 1);
 
       if (carouselRef.current) {
-        carouselRef.current.style.transition = "none"
-        carouselRef.current.style.transform = "translateX(0)"
-        // Force reflow
-        carouselRef.current.offsetHeight
-        carouselRef.current.style.transition = "transform 500ms ease-in-out"
+        carouselRef.current.style.transition = "none";
+        carouselRef.current.style.transform = "translateX(0)";
+        carouselRef.current.offsetHeight;
       }
-      setIsAnimating(false)
-    }, 500)
+
+      setTimeout(() => {
+        if (carouselRef.current) {
+          carouselRef.current.style.transition = "transform 300ms ease-in-out";
+        }
+        setIsAnimating(false);
+      }, 50);
+    }, 300);
   }
 
-  // Replace the prevQuote function with this:
+  // Handle previous quote
   const prevQuote = () => {
-    if (isAnimating) return
-    setIsAnimating(true)
+    if (isAnimating || quoteIndex <= 0) return;
+    setIsAnimating(true);
 
-    // If we're at the beginning, don't allow going back further
-    if (quoteIndex === 0) {
-      setIsAnimating(false)
-      return
-    }
-
-    // First insert the previous item at the beginning without animation
     if (carouselRef.current) {
-      carouselRef.current.style.transition = "none"
-      carouselRef.current.style.transform = "translateX(-33.33%)"
-      // Force reflow
-      carouselRef.current.offsetHeight
-      carouselRef.current.style.transition = "transform 500ms ease-in-out"
-      carouselRef.current.style.transform = "translateX(0)"
+      carouselRef.current.style.transition = "none";
+      carouselRef.current.style.transform = "translateX(-33.33%)";
+      carouselRef.current.offsetHeight;
+      carouselRef.current.style.transition = "transform 300ms ease-in-out";
+      carouselRef.current.style.transform = "translateX(0)";
     }
 
-    // After animation completes, update the index
     setTimeout(() => {
-      setQuoteIndex((prevIndex) => prevIndex - 1)
-      setIsAnimating(false)
-    }, 500)
+      setQuoteIndex(prevIndex => prevIndex - 1);
+      setIsAnimating(false);
+    }, 300);
   }
 
-  // Get the current visible quotes
-  const visibleQuotes = [
-    quotes[quoteIndex % quotes.length],
-    quotes[(quoteIndex + 1) % quotes.length],
-    quotes[(quoteIndex + 2) % quotes.length],
-  ]
+  // Get the current visible quotes (3 by 3)
+  const visibleQuotes = quotes.slice(quoteIndex, quoteIndex + 3);
 
   return (
     <div>
-      {/* Carousel */}
+      {/* Main Carousel */}
       <div className="relative w-full h-[400px] overflow-hidden mt-10">
         {images.map((image, index) => (
           <img
@@ -131,21 +115,20 @@ function Home() {
             }`}
           />
         ))}
-
-        {/* Navigation Buttons */}
         <button
           onClick={() => setCurrentIndex((currentIndex - 1 + images.length) % images.length)}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full"
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
         >
           ❮
         </button>
         <button
           onClick={() => setCurrentIndex((currentIndex + 1) % images.length)}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full"
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
         >
           ❯
         </button>
       </div>
+
       {/* Marquee Section */}
       <div className="w-full bg-black py-6 overflow-hidden">
         <div className="relative flex items-center whitespace-nowrap text-white text-2xl animate-marquee">
@@ -158,7 +141,6 @@ function Home() {
             <span className="mx-8 font-cousine text-bold">·</span>
             <span className="mx-8 font-cousine text-bold">WEAR GOD'S WORDS</span>
           </div>
-          {/* Duplicate content for seamless loop */}
           <div className="flex">
             <span className="mx-8 font-cousine text-bold">·</span>
             <span className="mx-8 font-cousine text-bold">WEAR GOD'S WORDS</span>
@@ -177,7 +159,6 @@ function Home() {
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-10">FEATURES</h2>
 
-          {/* Section 1: Premium & Basic Tees */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div>
               <div className="relative group mb-6">
@@ -218,45 +199,45 @@ function Home() {
             </div>
           </div>
 
-          {/* Shop All Products Button */}
-          <div className="mt-8">
-            <a href="/shop" className="bg-black text-white py-2 px-6 rounded-lg font-medium text-sm hover:bg-gray-800">
-              Shop All Products
-            </a>
+          <div className="mt-10"> 
+            <a href="/shop" className="bg-black text-white py-4 px-10 rounded-lg font-medium text-sm border-2 border-black hover:bg-transparent hover:text-black transition-all duration-300"> 
+              Shop All Products 
+            </a> 
           </div>
         </div>
       </div>
 
-      {/* Quote Carousel - Enhanced with smooth animations and larger size */}
+      {/* Quote Carousel - Fixed with smooth animations */}
       <div className="relative w-full py-5 bg-gray-50">
-
-        <div className="relative max-w-7xl mx-auto px-4 overflow-hidden">
-          <div
-            ref={carouselRef}
-            className="flex transition-transform duration-500 ease-in-out"
-            style={{ transform: "translateX(0)" }}
-          >
-            {visibleQuotes.map((quote, index) => (
-              <div key={index} className="w-1/3 px-2">
-                <div className="transform transition-all duration-500 hover:scale-105">
-                  <img
-                    src={quote || "/placeholder.svg"}
-                    alt={`Quote ${index + 1}`}
-                    className="w-full h-auto object-cover rounded-lg shadow-xl"
-                  />
+        <div className="relative max-w-7xl mx-auto px-4">
+          <div className="relative overflow-hidden">
+            <div
+              ref={carouselRef}
+              className="flex transition-transform duration-300 ease-in-out"
+              style={{ transform: "translateX(0)" }}
+            >
+              {visibleQuotes.map((quote, index) => (
+                <div key={index} className="w-1/3 flex-shrink-0 px-2">
+                  <div className="transform transition-all duration-300 hover:scale-105">
+                    <img
+                      src={quote.src || "/placeholder.svg"} // Dynamically render quotes from Firestore
+                      alt={`Quote ${index + 1}`}
+                      className="w-full h-auto object-contain rounded-lg shadow-md"
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
           <button
             onClick={prevQuote}
-            disabled={isAnimating}
-            className="absolute left-8 top-1/2 transform -translate-y-1/2 bg-black text-white p-4 rounded-full shadow-lg hover:bg-gray-800 transition-all duration-300 ease-in-out z-10 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isAnimating || quoteIndex === 0}
+            className="absolute left-8 top-1/2 transform -translate-y-1/2 bg-black text-white p-3 rounded-full shadow-lg hover:bg-gray-800 transition-all duration-200 ease-in-out z-10 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="w-8 h-8 text-white"
+              className="w-6 h-6 text-white"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -270,12 +251,12 @@ function Home() {
 
           <button
             onClick={nextQuote}
-            disabled={isAnimating}
-            className="absolute right-8 top-1/2 transform -translate-y-1/2 bg-black text-white p-4 rounded-full shadow-lg hover:bg-gray-800 transition-all duration-300 ease-in-out z-10 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isAnimating || quoteIndex >= quotes.length - 3}
+            className="absolute right-8 top-1/2 transform -translate-y-1/2 bg-black text-white p-3 rounded-full shadow-lg hover:bg-gray-800 transition-all duration-200 ease-in-out z-10 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="w-8 h-8 text-white"
+              className="w-6 h-6 text-white"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -287,24 +268,17 @@ function Home() {
             </svg>
           </button>
 
-          {/* Replace the indicator dots section with this: */}
-          <div className="flex justify-center mt-8 space-x-3">
-            {Array.from({ length: quotes.length - 2 }).map((_, index) => {
-              // Only show dots for the original quotes (not duplicates)
-              if (index < 6) {
-                return (
-                  <button
-                    key={index}
-                    className={`h-3 w-3 rounded-full transition-all duration-300 ${
-                      index === (quoteIndex % 6) ? "bg-black scale-125" : "bg-gray-300"
-                    }`}
-                    onClick={() => !isAnimating && setQuoteIndex(index)}
-                    disabled={isAnimating}
-                  />
-                )
-              }
-              return null
-            })}
+          <div className="flex justify-center mt-6 space-x-2">
+            {Array.from({ length: quotes.length - 2 }).map((_, index) => (
+              <button
+                key={index}
+                className={`h-2 w-2 rounded-full transition-all duration-300 ${
+                  index === quoteIndex ? "bg-black scale-125" : "bg-gray-300"
+                }`}
+                onClick={() => !isAnimating && setQuoteIndex(index)}
+                disabled={isAnimating}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -312,5 +286,4 @@ function Home() {
   )
 }
 
-export default Home
-
+export default Home;

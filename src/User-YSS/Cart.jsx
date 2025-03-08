@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCart } from '../Layout/CartContext';  // Ensure your cart context is correctly imported
+import { useCart } from '../Layout/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trash2, Minus, Plus } from 'lucide-react';
 
@@ -29,7 +29,7 @@ function Cart() {
 
   // Calculate subtotal
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-
+  
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Header with back button */}
@@ -69,7 +69,7 @@ function Cart() {
 
               <div className="divide-y">
                 {cartItems.map((item, index) => (
-                  <div key={`${item.id}-${item.size}-${index}`} className="grid grid-cols-1 md:grid-cols-12 p-4 gap-4 items-center">
+                  <div key={`${item.id}-${item.size || index}`} className="grid grid-cols-1 md:grid-cols-12 p-4 gap-4 items-center">
                     {/* Product Info */}
                     <div className="col-span-6 flex items-center">
                       <img src={item.image} alt={item.name} className="w-20 h-20 object-cover rounded-md" />
@@ -133,7 +133,7 @@ function Cart() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>
-                  <span>Calculated at checkout</span>
+                  <span>Cash On Delivery</span>
                 </div>
               </div>
               

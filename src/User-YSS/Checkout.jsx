@@ -27,7 +27,6 @@ function Checkout() {
   const [isEditing, setIsEditing] = useState(false);
   const [newAddress, setNewAddress] = useState(address);
   const [cartItemsState, setCartItems] = useState(cartItems); // Add state for cart items
-
   useEffect(() => {
     // Fetch user address when the component mounts
     const fetchUserAddress = async () => {
