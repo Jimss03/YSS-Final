@@ -3,12 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth"; 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import toastify styles
+import { Eye, EyeOff } from "lucide-react"; // Import Eye icons from lucide-react
 
 const AdminLogin = ({ logInHandler }) => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -62,6 +64,11 @@ const AdminLogin = ({ logInHandler }) => {
     }
   };
 
+  // Toggle password visibility
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div className="flex h-screen bg-gray-100 relative">
       <ToastContainer /> {/* Toast container for notifications */}
@@ -101,15 +108,25 @@ const AdminLogin = ({ logInHandler }) => {
               <label htmlFor="password" className="block text-gray-700 font-medium">
                 Password
               </label>
-              <input
-                type="password"
-                id="password"
-                placeholder="Password"
-                className="w-full mt-2 p-3 border border-gray-400 rounded-lg focus:outline-none focus:ring focus:ring-gray-400"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  placeholder="Password"
+                  className="w-full mt-2 p-3 border border-gray-400 rounded-lg focus:outline-none focus:ring focus:ring-gray-400"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-5 text-gray-600"
+                  onClick={togglePasswordVisibility}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
             <div className="flex items-center">
               <input type="checkbox" id="stay-signed-in" className="h-4 w-4 text-gray-600 focus:ring-gray-400" />
